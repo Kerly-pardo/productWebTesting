@@ -1,0 +1,321 @@
+openapi: 3.0.3
+info:
+  title: Swagger for ProductWeb
+  version: 1.1.6
+  description: Swagger for API of ProductWeb
+  contact:
+    email: alejo8591@gmail.com
+    name: Alejandro Romero
+    url: 'https://github.com/alejo8591'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'http://localhost:3001/api/v1'
+tags:
+  - name: users
+    description: Operations about users
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      security:
+        - bearerAuth: [ ]
+      summary: Get all users
+      description: Get all users in the platform.
+      operationId: getAllUsers
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsersDetailResponse'
+        '401':
+          description: Invalid token
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
+  /users/create:
+    post:
+      tags:
+        - users
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UsersCreateRequest'
+        required: true
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersDetailResponse'
+        '400':
+          description: Invalid id supplied
+          content: { }
+        '404':
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
+  /users/{email}/detail:
+    get:
+      tags:
+        - users
+      security:
+        - bearerAuth: [ ]
+      summary: Get user by email
+      description: Detail user by email in the platform.
+      operationId: getUserByEmail
+      parameters:
+        - name: email
+          in: path
+          description: 'The email that needs to be fetched. Use user1 for testing. '
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersDetailResponse'
+        '401':
+          description: Invalid token
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
+  /users/{email}/update:
+    put:
+      tags:
+        - users
+      security:
+        - bearerAuth: [ ]
+      summary: Updated user by email
+      description: Update user by email. The user only can change phone, firstname, and lastname in the platform.
+      operationId: updateUserByEmail
+      parameters:
+        - name: email
+          in: path
+          description: email that need to be updated
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Updated user object
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UsersUpdateRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersDetailResponse'
+        '401':
+          description: Invalid token
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
+  /users/{email}/delete:
+    delete:
+      tags:
+        - users
+      security:
+        - bearerAuth: [ ]
+      summary: Delete user by email
+      description: Delete user by email but is soft delete
+      operationId: deleteUserByEmail
+      parameters:
+        - name: email
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+          content: { }
+        '401':
+          description: Invalid token
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
+  /users/authenticate:
+    post:
+      tags:
+        - users
+      summary: User authenticate by email and password
+      description: Auth users on the platform by email and password, and generate token for session
+      operationId: authenticate
+      requestBody:
+        description: Auth user object
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UsersAuthenticateRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersAuthenticateResponse'
+        '404':
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
+components:
+  schemas:
+    UsersDetailResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User identification
+          format: int64
+        firstname:
+          type: string
+          description: User firstname
+        lastname:
+          type: string
+          description: User lastname or surname
+        email:
+          type: string
+          description: User email
+        phone:
+          type: string
+          description: User phone max. 10 digits
+        status:
+          type: boolean
+          description: User status
+    UsersCreateRequest:
+      type: object
+      properties:
+        firstname:
+          type: string
+          description: User firstname
+        lastname:
+          type: string
+          description: User lastname or surname
+        email:
+          type: string
+          description: User email
+        phone:
+          type: string
+          description: User phone max. 10 digits
+        password:
+          type: string
+          description: User password between 8 to 20 chars
+    UsersUpdateRequest:
+      type: object
+      properties:
+        firstname:
+          type: string
+          description: User firstname
+        lastname:
+          type: string
+          description: User lastname or surname
+        phone:
+          type: string
+          description: User phone max. 10 digits
+    UsersAuthenticateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User alias or email
+        password:
+          type: string
+          description: User password between 8 to 20 chars
+    UsersAuthenticateResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User identification
+          format: int64
+        firstname:
+          type: string
+          description: User firstname
+        lastname:
+          type: string
+          description: User lastname or surname
+        email:
+          type: string
+          description: User email
+        phone:
+          type: string
+          description: User phone max. 10 digits
+        token:
+          type: string
+          description: Bearer token
+    UnauthorizedError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Invalid Token
+    NotFoundErrorResponse:
+      type: object
+      properties:
+        code:
+          type: number
+          description: Add HTTP error code for default 404
+        message:
+          type: string
+          description: Invalid Token
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  # optional, for documentation purposes only
+security:
+  - bearerAuth: []
